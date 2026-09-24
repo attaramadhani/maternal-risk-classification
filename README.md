@@ -1,101 +1,119 @@
-# Maternal Risk Classification using Machine Learning (SKI 2023)
+# Leakage-Safe Explainable XGBoost Framework for Multiclass Maternal Health Risk Triage
 
-> **Dataset:** 2023 Indonesian Health Survey (Survei Kesehatan Indonesia - SKI) — Ministry of Health of Indonesia  
-> **Author / Penulis:** Attala Alif Ramadhani Tri Hida  
-> **Models:** Random Forest vs XGBoost · **Framework:** CRISP-DM  
-> **Task:** 3-Class Multiclass Risk Classification — Low Risk / High Risk / Very High Risk
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20727538.svg)](https://doi.org/10.5281/zenodo.20727538)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> **Dataset:** 2023 Indonesian Health Survey (*Survei Kesehatan Indonesia - SKI 2023*) — Ministry of Health of the Republic of Indonesia ($N = 211,351$)  
+> **Authors:** Attala Alif Ramadhani Tri Hida$^{1*}$, Wahyudi Setiawan$^{2}$  
+> **Affiliation:** Department of Information Systems, Faculty of Engineering, Universitas Trunojoyo Madura  
+> **Task:** Three-Tier Clinical Maternal Risk Stratification (Low Risk / High Risk / Very High Risk - KSPR Standard)  
+> **Zenodo DOI:** [10.5281/zenodo.20727538](https://doi.org/10.5281/zenodo.20727538)
 
 ---
 
-## Overview
+## 📌 Overview
 
-This repository contains the complete, reproducible machine learning pipeline for classifying maternal health risk levels based on the **Poedji Rochjati Score Card (KSPR)** parameters derived from the SKI 2023 national survey dataset ($N = 211,351$).
+This repository contains the complete, reproducible, and leakage-safe machine learning pipeline for classifying maternal health risk levels based on the official Indonesian **Poedji Rochjati Score Card (*Kartu Skor Poedji Rochjati*, KSPR)** triage standard. The framework is trained and validated on nationwide microdata from the 2023 Indonesian Health Survey (SKI 2023) covering 211,351 pregnant women across all 38 provinces.
 
-### Key Methodological Highlights:
+### 🌟 Key Scientific & Methodological Contributions:
 
-| Methodological Aspect | Technical Implementation |
+| Methodological Dimension | Technical Implementation & Clinical Safeguards |
 |---|---|
-| **Leakage-Free Pipeline** | `imblearn.Pipeline` — SMOTE resampling ($k=5$) applied strictly inside Cross-Validation folds |
-| **Data Cleaning** | Excluded administrative IDs and post-hoc cesarean delivery columns to eliminate data leakage |
-| **Hyperparameter Tuning** | `RandomizedSearchCV` · 5-Fold Stratified CV (Random Forest & XGBoost) |
-| **Statistical Validation** | 10-Fold CV + **Wilcoxon Signed-Rank Test** for statistical significance testing |
-| **Explainable AI (XAI)** | **SHAP** — Summary Bee Swarm Plots, Local Patient Waterfall Plots, Dependence Plots |
-| **Automated Reporting** | Generates publication-grade figures (200 DPI) and full Word reports (`laporan_hasil_eksperimen.docx`) |
+| **Leakage-Safe Resampling** | Dynamic SMOTE oversampling is strictly encapsulated inside cross-validation training folds via `imblearn.pipeline.Pipeline`, preventing optimistic validation contamination. |
+| **National Scale ($N=211,351$)** | Nationwide representative cohort across all 38 Indonesian provinces, resolving localized sample bias in prior literature. |
+| **Three-Tier KSPR Alignment** | Directly operationalizes the clinical three-tier triage system (KRR, KRT, KRST) mandated by Indonesian primary healthcare protocols. |
+| **Zero Fatal Under-Triage** | The proposed Tuned XGBoost model completely eliminates fatal false negatives from the Very High-Risk (KRST) category into Low Risk (0.0% fatal under-triage). |
+| **Dual-Level Explainable AI** | **TreeSHAP** provides global population risk thresholds (maternal age $\ge 35$, miscarriage $\ge 1$, parity $\ge 4$) and individualized patient waterfall attributions. |
+| **Statistical Significance** | 10-Fold Cross-Validation confirmed superiority via the **Wilcoxon Signed-Rank Test** ($W = 0.0000, p = 1.50 \times 10^{-4} < 0.001$). |
+| **SDG Alignment** | Directly contributes to **SDG 3** (Maternal Mortality Reduction), **SDG 9** (Digital Health Innovation), and **SDG 10** (Geographic Healthcare Equity). |
 
 ---
 
-## Repository Contents
+## 📂 Repository Contents
 
-```
+```text
 .
-├── main.py       ← Single master pipeline & figure/report generator
-├── README.md     ← Documentation & setup guide
-└── .gitignore    ← Excludes dataset CSVs, model caches, output figures, and Word reports
+├── main.py       ← Single master pipeline, figure generator, and experimental report exporter
+├── README.md     ← Documentation, methodological summary, and reproduction guide
+└── .gitignore    ← Excludes raw survey CSVs, model weight caches, and generated media
 ```
 
-> **Privacy & Reproducibility:** Raw survey CSV datasets, trained model binary caches (`model_cache.pkl`), generated output figures, and Word document reports are excluded from this repository per `.gitignore` guidelines to protect respondent privacy and maintain a lightweight code repository.
+> **Privacy & Reproducibility Notice:** Raw survey microdata from SKI 2023 is owned and managed by the [Health Data Service Portal of the Ministry of Health of Indonesia](https://layanandata.kemkes.go.id/) and cannot be redistributed publicly. Pre-trained model caches (`model_cache.pkl`) and generated figures are excluded per `.gitignore`.
 
 ---
 
-## Getting Started & Execution Guide
+## 🚀 Getting Started & Execution Guide
 
-### 1. Install Required Dependencies
+### 1. Installation of Dependencies
 
-Ensure Python $\ge 3.9$ is installed, then install the required dependencies:
+Ensure Python $\ge 3.9$ is installed, then install the required computational packages:
 
 ```bash
-pip install pandas numpy matplotlib seaborn scikit-learn xgboost \
-            imbalanced-learn shap scipy joblib pillow python-docx
+pip install pandas numpy matplotlib seaborn scikit-learn xgboost             imbalanced-learn shap scipy joblib pillow python-docx
 ```
 
 ### 2. Prepare the Dataset
 
-Place your SKI 2023 dataset CSV file in the same directory as `main.py` and name it `dataset_ski_2023.csv`:
+Place your SKI 2023 dataset CSV file in the root repository directory and name it `dataset_ski_2023.csv`:
 
-```
+```text
 .
 ├── dataset_ski_2023.csv
 └── main.py
 ```
 
-> **Privacy Note:** The SKI 2023 national survey dataset is managed by the [Ministry of Health of Indonesia (Kemenkes RI)](https://layanandata.kemkes.go.id/) and is kept private.
+### 3. Run the Complete Pipeline
 
-### 3. Run the Pipeline
-
-Execute the master pipeline script:
+Execute the master pipeline:
 
 ```bash
 python main.py
 ```
 
-**Automatic Pipeline Behavior:**
-1. **Dataset Preprocessing:** Loads `dataset_ski_2023.csv`, drops administrative IDs and leakage columns, performs an 80/20 stratified split into training ($n = 169,080$) and hold-out test ($n = 42,271$) sets.
-2. **Model Training & Tuning (First Run):** If `model_cache.pkl` is absent, trains baseline models, performs 5-fold CV hyperparameter tuning using `RandomizedSearchCV`, evaluates hold-out predictions, and automatically saves `model_cache.pkl`.
-3. **Cache Loading (Subsequent Runs):** Loads `model_cache.pkl` directly for instant execution (< 10 seconds).
-4. **Statistical Validation:** Computes 10-Fold CV summaries, per-class specificity scores, and the Wilcoxon Signed-Rank Test.
-5. **Figure Generation:** Renders Figures 2–6 in standard publication font sizes to `figures_final/` and `figures_en/`.
-6. **Word Report Export:** Automatically creates `laporan_hasil_eksperimen.docx` containing complete execution tables, statistical test results, and embedded high-resolution figures.
+**Automated Pipeline Workflow:**
+1. **Preprocessing & Leakage Prevention:** Loads microdata, filters validated pregnancies ($N = 211,351$), excludes non-predictive IDs and post-hoc surgical variables (`metode_persalinan_sesar`), and performs an 80/20 stratified split into training ($n = 169,080$) and hold-out test ($n = 42,271$) sets.
+2. **Model Training & Hyperparameter Tuning:** Performs 5-fold stratified cross-validated randomized search for XGBoost and Random Forest, caching optimal models to `model_cache.pkl`.
+3. **Statistical Validation:** Computes 10-fold CV metrics, per-class specificity, and Wilcoxon Signed-Rank hypothesis tests.
+4. **Publication-Grade Figure Generation:** Renders high-resolution 300 DPI figures into:
+   - `figures_combined/`: Figures 1–6 (side-by-side composite panels).
+   - `figures_separated/`: Figures 1–10 (individual standalone plots for two-column journal templates).
+5. **Report Export:** Automatically produces `laporan_hasil_eksperimen.docx` and `LAPORAN_HASIL_EKSPERIMEN.md`.
 
 ---
 
-## Experimental Results Summary
+## 📊 Experimental Benchmark Summary
 
-Evaluated on the independent hold-out test set ($n = 42,271$):
+Evaluated on the independent nationwide hold-out test set ($n = 42,271$):
 
-| Model Variant | Accuracy | F1-Macro | ROC-AUC (Macro OvR) | PR-AUC (Macro OvR) |
-|---|---|---|---|---|
-| Random Forest (Baseline) | 0.9477 | 0.9169 | 0.9931 | 0.9712 |
-| XGBoost (Baseline) | 0.9510 | 0.9200 | 0.9944 | 0.9745 |
-| Random Forest (Tuned) | 0.9480 | 0.9184 | 0.9934 | 0.9720 |
-| **XGBoost (Tuned - Best Model)** | **0.9516** | **0.9207** | **0.9946** | **0.9754** |
+| Model Architecture | Accuracy (%) | F1-Macro | ROC-AUC (Macro OvR) | PR-AUC (Macro OvR) | Precision (KRST) (%) | Recall (KRST) (%) | F1-Score (KRST) |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| Decision Tree (C4.5 Baseline) | 93.78% | 0.8977 | 0.9273 | 0.9250 | 79.13% | 80.61% | 0.7986 |
+| Random Forest (Default Baseline) | 94.77% | 0.9169 | 0.9931 | 0.9712 | 80.33% | 87.82% | 0.8391 |
+| XGBoost (Default Baseline) | 95.10% | 0.9200 | 0.9944 | 0.9745 | 82.26% | 85.79% | 0.8399 |
+| Random Forest (Tuned) | 94.80% | 0.9184 | 0.9934 | 0.9720 | 79.18% | **90.01%** | 0.8425 |
+| **PROPOSED: Tuned XGBoost** | **95.16%** | **0.9207** | **0.9946** | **0.9754** | **82.25%** | 86.00% | **0.8408** |
 
-### Statistical Significance:
-* **Wilcoxon Signed-Rank Test:** $Z = 0.0000$, $p = 1.50 \times 10^{-4}$ ($p < 0.05$) — the performance superiority of Tuned XGBoost over Tuned Random Forest is **statistically significant**.
+### Clinical Safety & Statistical Significance:
+* **Zero Fatal Under-Triage:** $0.00\%$ fatal false negatives (0 cases misclassified from KRST into Low Risk).
+* **Wilcoxon Signed-Rank Test:** $W = 0.0000, p = 1.50 \times 10^{-4} < 0.001$ against Decision Tree and Random Forest baselines.
 
 ---
 
-## Author & Citation
+## ✍️ Citation & Zenodo Archival
 
-* **Author:** Attala Alif Ramadhani Tri Hida  
-* **Repository:** [https://github.com/attaramadhani/laporan-crisp-dm](https://github.com/attaramadhani/laporan-crisp-dm)  
-* **Purpose:** Research and development of early-warning decision support systems for maternal health risk assessment.
+If you utilize this codebase, methodology, or pipeline in your research, please cite:
+
+```bibtex
+@article{hida2026leakage,
+  title={Leakage-Safe Explainable XGBoost Framework for Multiclass Maternal Health Risk Triage},
+  author={Hida, Attala Alif Ramadhani Tri and Setiawan, Wahyudi},
+  journal={Jurnal RESTI (Rekayasa Sistem dan Teknologi Informasi)},
+  year={2026},
+  doi={10.5281/zenodo.20727538},
+  url={https://github.com/attaramadhani/laporan-crisp-dm}
+}
+```
+
+* **GitHub Repository:** [https://github.com/attaramadhani/laporan-crisp-dm](https://github.com/attaramadhani/laporan-crisp-dm)  
+* **Zenodo Archive DOI:** [https://doi.org/10.5281/zenodo.20727538](https://doi.org/10.5281/zenodo.20727538)

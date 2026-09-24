@@ -43,3 +43,13 @@ venv/
 .idea/
 .vscode/
 .DS_Store
+figures_combined/
+figures_separated/
+foto_versi_gabung/
+foto_versi_pisah/
+# Legacy temporary scripts
+analisis_statistik_v5.py
+fix_shap_bar.py
+generate_english_plots_v2.py
+generate_english_plots_v3.py
+laporan_crisp_dm_v5.py
