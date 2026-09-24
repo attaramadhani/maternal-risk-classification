@@ -94,8 +94,10 @@ if not os.path.exists(CACHE_FILE) and os.path.exists("v5_cache.pkl"):
     CACHE_FILE = "v5_cache.pkl"
 DT_CACHE_FILE = "dt_cache.pkl"
 
-# Output directory for publication-ready figures
+# Output directories for publication-ready figures
 OUTPUT_DIR = "figures_final"
+OUTPUT_DIR_GABUNG = "figures_combined"
+OUTPUT_DIR_PISAH = "figures_separated"
 
 # Random seed for experimental reproducibility across splits and models
 RANDOM_STATE = 42
@@ -103,6 +105,8 @@ RANDOM_STATE = 42
 # Ensure target output directories exist
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs("figures_en", exist_ok=True)
+os.makedirs(OUTPUT_DIR_GABUNG, exist_ok=True)
+os.makedirs(OUTPUT_DIR_PISAH, exist_ok=True)
 
 def log(msg: str) -> None:
     """Helper function to print timestamped system log messages."""
@@ -446,6 +450,81 @@ print(f"  Specificity XGB [Low / High / Very High] : {spec_xgb[0]:.4f} / {spec_x
 print("="*65 + "\n")
 
 
+
+# ------------------------------------------------------------------------------
+# PUBLICATION FIGURE CAPTIONS & CLINICAL DESCRIPTIONS (ENGLISH)
+# ------------------------------------------------------------------------------
+FIGURE_CAPTIONS_COMBINED = {
+    "Figure_1_Methodology_Flowchart.png": {
+        "caption": "Figure 1. Methodology flowchart illustrating the leakage-safe CRISP-DM workflow with encapsulated SMOTE resampling and dual-level SHAP explainability.",
+        "description": "Flowchart outlining the end-to-end research methodology across the six iterative CRISP-DM stages tailored for national health survey data mining."
+    },
+    "Figure_2_Confusion_Matrices_Combined.png": {
+        "caption": "Figure 2. Confusion matrix dynamics on the hold-out test set for Tuned XGBoost (Absolute Counts & Normalized Percentages).",
+        "description": "Confusion matrix evaluation confirming high discriminative fidelity across all three risk tiers, achieving 86.00% recall on the Very High-Risk tier with exactly zero fatal false negatives into the Low-Risk tier."
+    },
+    "Figure_3_Multiclass_Discrimination_Combined.png": {
+        "caption": "Figure 3. Multiclass discrimination analysis for Tuned XGBoost (ROC-AUC & Precision-Recall Curves).",
+        "description": "Multiclass ROC (Macro AUC = 0.9946) and Precision-Recall (Macro PR-AUC = 0.9754) curves demonstrating outstanding separability across Low Risk, High Risk, and Very High Risk categories."
+    },
+    "Figure_4_SHAP_Summary_Beeswarm.png": {
+        "caption": "Figure 4. Global SHAP summary beeswarm plot for Tuned XGBoost on the Very High-Risk (KRST) class.",
+        "description": "Global SHAP attribution revealing that maternal age, miscarriage history, parity, and acute obstetric complications serve as the dominant positive drivers of critical antenatal risk."
+    },
+    "Figure_5_SHAP_Waterfall.png": {
+        "caption": "Figure 5. Local SHAP waterfall plot detailing individual patient-level risk attribution for a True Positive Very High-Risk case.",
+        "description": "Local attribution breakdown illustrating the additive step-by-step contributions of individual clinical risk factors moving the base expected log-odds to the final high-risk prediction."
+    },
+    "Figure_6_SHAP_Dependence_Combined.png": {
+        "caption": "Figure 6. Non-linear SHAP dependence interaction plots for Tuned XGBoost (Maternal Age, Miscarriage History, Parity).",
+        "description": "Partial dependence trajectories highlighting physiological inflection boundaries: risk escalation surges sharply at maternal age >= 35 years, >= 1 prior miscarriages, and grand multiparity (>= 4 births)."
+    }
+}
+
+FIGURE_CAPTIONS_SEPARATED = {
+    "Figure_1_Methodology_Flowchart.png": {
+        "caption": "Figure 1. Methodology flowchart illustrating the leakage-safe CRISP-DM workflow.",
+        "description": "Flowchart of the six CRISP-DM phases from clinical problem definition through encapsulated SMOTE modeling to explainable AI validation."
+    },
+    "Figure_2_Confusion_Matrix_Absolute_Counts.png": {
+        "caption": "Figure 2. Confusion matrix of Tuned XGBoost displaying absolute patient counts on the hold-out test set.",
+        "description": "Out of 3,842 Very High-Risk patients, 3,304 are accurately triaged, 538 triaged to High Risk, and 0 misclassified into Low Risk (zero fatal under-triage)."
+    },
+    "Figure_3_Confusion_Matrix_Normalized_Percentages.png": {
+        "caption": "Figure 3. Normalized confusion matrix of Tuned XGBoost displaying class recall percentages.",
+        "description": "Shows 97.54% recall on Low Risk, 95.63% on High Risk, and 86.00% on Very High Risk, maintaining high sensitivity across all tiers."
+    },
+    "Figure_4_Multiclass_ROC_Curves.png": {
+        "caption": "Figure 4. Multiclass Receiver Operating Characteristic (ROC) curves for Tuned XGBoost.",
+        "description": "One-vs-Rest ROC curves achieving AUC = 0.9959 for Low Risk, 0.9934 for High Risk, and 0.9946 for Very High Risk (Macro AUC = 0.9946)."
+    },
+    "Figure_5_Multiclass_Precision_Recall_Curves.png": {
+        "caption": "Figure 5. Multiclass Precision-Recall (PR) curves for Tuned XGBoost.",
+        "description": "PR curves confirming precision retention: PR-AUC = 0.9856 (Low Risk), 0.9897 (High Risk), and 0.9509 (Very High Risk)."
+    },
+    "Figure_6_SHAP_Summary_Beeswarm.png": {
+        "caption": "Figure 6. Global SHAP summary beeswarm plot for Tuned XGBoost on the Very High-Risk (KRST) class.",
+        "description": "Identifies the top global risk predictors and their directional impact on very high-risk antenatal classifications."
+    },
+    "Figure_7_SHAP_Waterfall.png": {
+        "caption": "Figure 7. Local SHAP waterfall plot detailing individual patient-level risk attribution.",
+        "description": "Patient-level transparent explanation showing how clinical risk factors incrementally increase predicted risk from the base rate."
+    },
+    "Figure_8_SHAP_Dependence_Maternal_Age.png": {
+        "caption": "Figure 8. Non-linear SHAP dependence plot for Maternal Age (years).",
+        "description": "Validates the obstetric clinical boundary where risk attribution turns sharply positive at maternal age >= 35 years."
+    },
+    "Figure_9_SHAP_Dependence_Miscarriage_History.png": {
+        "caption": "Figure 9. Non-linear SHAP dependence plot for Total Miscarriages.",
+        "description": "Demonstrates that a single prior miscarriage history (>= 1) triggers an immediate surge in risk attribution (SHAP value = +1.18)."
+    },
+    "Figure_10_SHAP_Dependence_Parity.png": {
+        "caption": "Figure 10. Non-linear SHAP dependence plot for Parity (Prior Births).",
+        "description": "Illustrates risk inflection in grand multiparous mothers, where parity >= 4 sharply elevates predicted maternal risk."
+    }
+}
+
+
 # ==============================================================================
 # STAGE 6: PUBLICATION-GRADE FIGURE GENERATION (FIGURES 2 TO 6)
 # ==============================================================================
@@ -528,7 +607,7 @@ def generate_figure_2():
     sns.heatmap(cm_xgb_t, annot=True, fmt="d", cmap="Blues", ax=ax_a,
                 xticklabels=class_names, yticklabels=class_names,
                 annot_kws={"size": 11, "weight": "bold"}, cbar=True)
-    ax_a.set_title("Tuned XGBoost (Absolute Counts)", fontsize=12, fontweight="bold", pad=12)
+    ax_a.set_title("Tuned XGBoost: Confusion Matrix (Absolute Counts)", fontsize=12, fontweight="bold", pad=12)
     ax_a.set_xlabel("Predicted Label", fontsize=11, fontweight="bold", labelpad=8)
     ax_a.set_ylabel("Actual Label", fontsize=11, fontweight="bold", labelpad=8)
     ax_a.tick_params(axis="both", labelsize=10)
@@ -541,7 +620,7 @@ def generate_figure_2():
     sns.heatmap(cm_xgb_t_norm, annot=True, fmt=".1%", cmap="Blues", ax=ax_b,
                 xticklabels=class_names, yticklabels=class_names,
                 annot_kws={"size": 11, "weight": "bold"}, cbar=True)
-    ax_b.set_title("Tuned XGBoost (Normalized Percentages)", fontsize=12, fontweight="bold", pad=12)
+    ax_b.set_title("Tuned XGBoost: Confusion Matrix (Normalized Percentages)", fontsize=12, fontweight="bold", pad=12)
     ax_b.set_xlabel("Predicted Label", fontsize=11, fontweight="bold", labelpad=8)
     ax_b.set_ylabel("Actual Label", fontsize=11, fontweight="bold", labelpad=8)
     ax_b.tick_params(axis="both", labelsize=10)
@@ -670,7 +749,7 @@ def generate_figure_4():
     plt.close("all")
     fig = plt.figure(figsize=(8.5, 6.0))
     shap.summary_plot(shap_xgb_c2, X_test_sample_en, show=False)
-    plt.title("Figure 4. Global SHAP Summary Plot for Tuned XGBoost (Very High-Risk Class)", fontsize=12, fontweight="bold", pad=12)
+    plt.title("Global SHAP Summary Plot: Very High-Risk Class (KRST)", fontsize=12, fontweight="bold", pad=12)
     plt.tight_layout()
     save_matplotlib_figure(fig, "fig_4_shap_summary.png")
     fig.savefig(os.path.join(OUTPUT_DIR_GABUNG, "Figure_4_SHAP_Summary_Beeswarm.png"), dpi=300, bbox_inches="tight")
@@ -717,7 +796,7 @@ def generate_figure_5():
         data=X_test_en.iloc[tp_idx],
         feature_names=X_test_en.columns.tolist()
     ), show=False)
-    plt.title("Figure 5. SHAP Waterfall Plot for a Very High-Risk Patient", fontsize=12, fontweight="bold", pad=12)
+    plt.title("SHAP Waterfall Plot: Patient-Level Risk Attribution", fontsize=12, fontweight="bold", pad=12)
     plt.tight_layout()
     save_matplotlib_figure(fig, "fig_5_shap_waterfall.png")
     fig.savefig(os.path.join(OUTPUT_DIR_GABUNG, "Figure_5_SHAP_Waterfall.png"), dpi=300, bbox_inches="tight")
@@ -764,29 +843,34 @@ def generate_figure_6():
         plt.close("all")
         return Image.open(buf).copy()
         
+    # 1. Composite panels with sub-labels (a, b, c) for Figure 6
     img_age = render_dependence_panel("Maternal Age (years)", "(a) Maternal Age")
     img_misc = render_dependence_panel("Total Miscarriages", "(b) Miscarriage History")
     img_parity = render_dependence_panel("Parity (Prior Births)", "(c) Parity")
     
     target_h = max(img_age.size[1], img_misc.size[1], img_parity.size[1])
-    img_age = pad_image_to_height(img_age, target_h)
-    img_misc = pad_image_to_height(img_misc, target_h)
-    img_parity = pad_image_to_height(img_parity, target_h)
+    img_age_p = pad_image_to_height(img_age, target_h)
+    img_misc_p = pad_image_to_height(img_misc, target_h)
+    img_parity_p = pad_image_to_height(img_parity, target_h)
     
     gap = 25
-    total_w = img_age.size[0] + gap + img_misc.size[0] + gap + img_parity.size[0]
+    total_w = img_age_p.size[0] + gap + img_misc_p.size[0] + gap + img_parity_p.size[0]
     combined = Image.new("RGB", (total_w, target_h), (255, 255, 255))
-    combined.paste(img_age, (0, 0))
-    combined.paste(img_misc, (img_age.size[0] + gap, 0))
-    combined.paste(img_parity, (img_age.size[0] + gap + img_misc.size[0] + gap, 0))
+    combined.paste(img_age_p, (0, 0))
+    combined.paste(img_misc_p, (img_age_p.size[0] + gap, 0))
+    combined.paste(img_parity_p, (img_age_p.size[0] + gap + img_misc_p.size[0] + gap, 0))
     
     save_pil_image(combined, "fig_6_shap_dependence.png")
     combined.save(os.path.join(OUTPUT_DIR_GABUNG, "Figure_6_SHAP_Dependence_Combined.png"), dpi=(300, 300))
     
-    # Save standalone separated panels to figures_separated
-    img_age.save(os.path.join(OUTPUT_DIR_PISAH, "Figure_8_SHAP_Dependence_Maternal_Age.png"), dpi=(300, 300))
-    img_misc.save(os.path.join(OUTPUT_DIR_PISAH, "Figure_9_SHAP_Dependence_Miscarriage_History.png"), dpi=(300, 300))
-    img_parity.save(os.path.join(OUTPUT_DIR_PISAH, "Figure_10_SHAP_Dependence_Parity.png"), dpi=(300, 300))
+    # 2. Standalone separated panels with complete publication titles (Figures 8, 9, 10)
+    img_age_sep = render_dependence_panel("Maternal Age (years)", "SHAP Dependence: Maternal Age (years)")
+    img_misc_sep = render_dependence_panel("Total Miscarriages", "SHAP Dependence: Miscarriage History")
+    img_parity_sep = render_dependence_panel("Parity (Prior Births)", "SHAP Dependence: Parity (Prior Births)")
+    
+    img_age_sep.save(os.path.join(OUTPUT_DIR_PISAH, "Figure_8_SHAP_Dependence_Maternal_Age.png"), dpi=(300, 300))
+    img_misc_sep.save(os.path.join(OUTPUT_DIR_PISAH, "Figure_9_SHAP_Dependence_Miscarriage_History.png"), dpi=(300, 300))
+    img_parity_sep.save(os.path.join(OUTPUT_DIR_PISAH, "Figure_10_SHAP_Dependence_Parity.png"), dpi=(300, 300))
     
     # Copy Figure 1 Methodology Flowchart to both folders if available
     fc_src = "Figure1_Methodology_Flowchart.png"
@@ -1025,24 +1109,31 @@ def generate_docx_report():
     h6_fig = doc.add_heading('6. Experimental Visualizations & TreeSHAP Interpretability', level=1)
     for r in h6_fig.runs: r.font.color.rgb = RGBColor(27, 54, 93)
     
-    figures_info = [
-        ("Figure_2_Confusion_Matrices_Combined.png", "Figure 2. Confusion matrix dynamics on the hold-out test set for Tuned XGBoost (Absolute Counts & Normalized Percentages).",
-         "The confusion matrix confirms high discriminative capability, achieving 86.0% recall on the Very High-Risk tier with exactly zero fatal false negatives into the Low-Risk tier."),
-        ("Figure_3_Multiclass_Discrimination_Combined.png", "Figure 3. Multiclass discrimination analysis for Tuned XGBoost (ROC-AUC & Precision-Recall Curves).",
-         "Multiclass ROC (AUC = 0.9946) and Precision-Recall (PR-AUC = 0.9754) curves confirm outstanding discrimination across all three maternal risk tiers."),
-        ("Figure_4_SHAP_Summary_Beeswarm.png", "Figure 4. Global SHAP summary beeswarm plot for Tuned XGBoost on the Very High-Risk (KRST) class.",
-         "Global SHAP analysis establishes that maternal age, prior miscarriages, parity, and acute obstetric complications are the decisive drivers of high-risk triage."),
-        ("Figure_5_SHAP_Waterfall.png", "Figure 5. SHAP waterfall plot explaining local feature attributions for a single True Positive Very High-Risk patient.",
-         "The waterfall plot delivers transparent, patient-level etiology breakdowns, deconstructing additive positive and negative pushes for clinical bedside decision support."),
-        ("Figure_6_SHAP_Dependence_Combined.png", "Figure 6. Non-linear SHAP dependence plots for Tuned XGBoost (Maternal Age, Miscarriage History, Parity).",
-         "Dependence plots validate critical pathophysiological risk inflection points, including the sharp risk escalation at maternal age >= 35 years and miscarriage history >= 1.")
+    # 6.1 Composite Panel Figures (Embedded)
+    h6_sub1 = doc.add_heading('6.1. Composite Panel Figures (figures_combined/)', level=2)
+    for r in h6_sub1.runs: r.font.color.rgb = RGBColor(27, 54, 93)
+    
+    figures_to_embed = [
+        "Figure_1_Methodology_Flowchart.png",
+        "Figure_2_Confusion_Matrices_Combined.png",
+        "Figure_3_Multiclass_Discrimination_Combined.png",
+        "Figure_4_SHAP_Summary_Beeswarm.png",
+        "Figure_5_SHAP_Waterfall.png",
+        "Figure_6_SHAP_Dependence_Combined.png"
     ]
     
-    for fig_file, cap_text, desc_text in figures_info:
+    for fig_file in figures_to_embed:
+        meta = FIGURE_CAPTIONS_COMBINED.get(fig_file, {"caption": fig_file, "description": ""})
+        cap_text = meta["caption"]
+        desc_text = meta["description"]
+        
         # Check figures_combined first
         fig_path = os.path.join(OUTPUT_DIR_GABUNG, fig_file)
         if not os.path.exists(fig_path):
             fig_path = os.path.join(OUTPUT_DIR, fig_file)
+        if not os.path.exists(fig_path) and os.path.exists(fig_file):
+            fig_path = fig_file
+            
         if os.path.exists(fig_path):
             doc.add_paragraph().paragraph_format.space_before = Pt(6)
             p_img = doc.add_paragraph()
@@ -1058,6 +1149,26 @@ def generate_docx_report():
             p_desc = doc.add_paragraph(desc_text)
             p_desc.paragraph_format.line_spacing = 1.15
             p_desc.paragraph_format.space_after = Pt(12)
+            
+    # 6.2 Standalone Publication Figures Reference List (Figures 1 to 10)
+    h6_sub2 = doc.add_heading('6.2. Standalone Publication Figures Reference List (figures_separated/)', level=2)
+    for r in h6_sub2.runs: r.font.color.rgb = RGBColor(27, 54, 93)
+    p_sep_intro = doc.add_paragraph(
+        'For single-column journal typesetting, standalone individual figures (Figures 1 to 10) are exported with '
+        'standard 300 DPI resolution into the `figures_separated/` directory with the following official captions:'
+    )
+    p_sep_intro.paragraph_format.line_spacing = 1.15
+    
+    for fig_file, meta in FIGURE_CAPTIONS_SEPARATED.items():
+        p_item = doc.add_paragraph()
+        r_fn = p_item.add_run(f"• {fig_file}: ")
+        r_fn.font.bold = True
+        r_fn.font.color.rgb = RGBColor(27, 54, 93)
+        r_cap = p_item.add_run(f"{meta['caption']} ")
+        r_cap.font.italic = True
+        r_desc = p_item.add_run(f"— {meta['description']}")
+        p_item.paragraph_format.space_after = Pt(4)
+        p_item.paragraph_format.line_spacing = 1.15
             
     # ── Section 7: Conclusion & Save ──────────────────────────────────────────
     h7 = doc.add_heading('7. Experimental Conclusions', level=1)
@@ -1154,25 +1265,59 @@ def generate_markdown_report():
 
 ---
 
-## 6. Generated Publication Figures
-- **`figures_combined/` (Composite Side-by-Side Panels):**
-  - Figure 1: Methodology Flowchart
-  - Figure 2: Confusion Matrices (Absolute Counts & Normalized %)
-  - Figure 3: Multiclass Discrimination Curves (ROC & Precision-Recall)
-  - Figure 4: Global SHAP Summary Beeswarm Plot
-  - Figure 5: Local SHAP Waterfall Plot
-  - Figure 6: Non-Linear SHAP Dependence Plots (Maternal Age, Miscarriages, Parity)
-- **`figures_separated/` (Standalone Individual Figures 1 to 10):**
-  - Figure 1: Methodology Flowchart
-  - Figure 2: Confusion Matrix (Absolute Patient Counts)
-  - Figure 3: Confusion Matrix (Normalized Percentages)
-  - Figure 4: Multiclass ROC-AUC Curves
-  - Figure 5: Multiclass Precision-Recall Curves
-  - Figure 6: Global SHAP Summary Beeswarm Plot
-  - Figure 7: Local SHAP Waterfall Plot
-  - Figure 8: Non-Linear SHAP Dependence Plot (Maternal Age)
-  - Figure 9: Non-Linear SHAP Dependence Plot (Miscarriage History)
-  - Figure 10: Non-Linear SHAP Dependence Plot (Parity)
+## 6. Generated Publication Figures & Complete English Captions
+
+### 6.1. Composite Panel Figures (`figures_combined/`)
+- **Figure 1 (`Figure_1_Methodology_Flowchart.png`):**  
+  *Caption:* Figure 1. Methodology flowchart illustrating the leakage-safe CRISP-DM workflow with encapsulated SMOTE resampling and dual-level SHAP explainability.  
+  *Description:* Flowchart outlining the end-to-end research methodology across the six iterative CRISP-DM stages tailored for national health survey data mining.
+- **Figure 2 (`Figure_2_Confusion_Matrices_Combined.png`):**  
+  *Caption:* Figure 2. Confusion matrix dynamics on the hold-out test set for Tuned XGBoost (Absolute Counts & Normalized Percentages).  
+  *Description:* Confusion matrix evaluation confirming high discriminative fidelity across all three risk tiers, achieving 86.00% recall on the Very High-Risk tier with exactly zero fatal false negatives into the Low-Risk tier.
+- **Figure 3 (`Figure_3_Multiclass_Discrimination_Combined.png`):**  
+  *Caption:* Figure 3. Multiclass discrimination analysis for Tuned XGBoost (ROC-AUC & Precision-Recall Curves).  
+  *Description:* Multiclass ROC (Macro AUC = 0.9946) and Precision-Recall (Macro PR-AUC = 0.9754) curves demonstrating outstanding separability across Low Risk, High Risk, and Very High Risk categories.
+- **Figure 4 (`Figure_4_SHAP_Summary_Beeswarm.png`):**  
+  *Caption:* Figure 4. Global SHAP summary beeswarm plot for Tuned XGBoost on the Very High-Risk (KRST) class.  
+  *Description:* Global SHAP attribution revealing that maternal age, miscarriage history, parity, and acute obstetric complications serve as the dominant positive drivers of critical antenatal risk.
+- **Figure 5 (`Figure_5_SHAP_Waterfall.png`):**  
+  *Caption:* Figure 5. Local SHAP waterfall plot detailing individual patient-level risk attribution for a True Positive Very High-Risk case.  
+  *Description:* Local attribution breakdown illustrating the additive step-by-step contributions of individual clinical risk factors moving the base expected log-odds to the final high-risk prediction.
+- **Figure 6 (`Figure_6_SHAP_Dependence_Combined.png`):**  
+  *Caption:* Figure 6. Non-linear SHAP dependence interaction plots for Tuned XGBoost (Maternal Age, Miscarriage History, Parity).  
+  *Description:* Partial dependence trajectories highlighting physiological inflection boundaries: risk escalation surges sharply at maternal age >= 35 years, >= 1 prior miscarriages, and grand multiparity (>= 4 births).
+
+### 6.2. Standalone Publication Figures (`figures_separated/`)
+- **Figure 1 (`Figure_1_Methodology_Flowchart.png`):**  
+  *Caption:* Figure 1. Methodology flowchart illustrating the leakage-safe CRISP-DM workflow.  
+  *Description:* Flowchart of the six CRISP-DM phases from clinical problem definition through encapsulated SMOTE modeling to explainable AI validation.
+- **Figure 2 (`Figure_2_Confusion_Matrix_Absolute_Counts.png`):**  
+  *Caption:* Figure 2. Confusion matrix of Tuned XGBoost displaying absolute patient counts on the hold-out test set.  
+  *Description:* Out of 3,842 Very High-Risk patients, 3,304 are accurately triaged, 538 triaged to High Risk, and 0 misclassified into Low Risk (zero fatal under-triage).
+- **Figure 3 (`Figure_3_Confusion_Matrix_Normalized_Percentages.png`):**  
+  *Caption:* Figure 3. Normalized confusion matrix of Tuned XGBoost displaying class recall percentages.  
+  *Description:* Shows 97.54% recall on Low Risk, 95.63% on High Risk, and 86.00% on Very High Risk, maintaining high sensitivity across all tiers.
+- **Figure 4 (`Figure_4_Multiclass_ROC_Curves.png`):**  
+  *Caption:* Figure 4. Multiclass Receiver Operating Characteristic (ROC) curves for Tuned XGBoost.  
+  *Description:* One-vs-Rest ROC curves achieving AUC = 0.9959 for Low Risk, 0.9934 for High Risk, and 0.9946 for Very High Risk (Macro AUC = 0.9946).
+- **Figure 5 (`Figure_5_Multiclass_Precision_Recall_Curves.png`):**  
+  *Caption:* Figure 5. Multiclass Precision-Recall (PR) curves for Tuned XGBoost.  
+  *Description:* PR curves confirming precision retention: PR-AUC = 0.9856 (Low Risk), 0.9897 (High Risk), and 0.9509 (Very High Risk).
+- **Figure 6 (`Figure_6_SHAP_Summary_Beeswarm.png`):**  
+  *Caption:* Figure 6. Global SHAP summary beeswarm plot for Tuned XGBoost on the Very High-Risk (KRST) class.  
+  *Description:* Identifies the top global risk predictors and their directional impact on very high-risk antenatal classifications.
+- **Figure 7 (`Figure_7_SHAP_Waterfall.png`):**  
+  *Caption:* Figure 7. Local SHAP waterfall plot detailing individual patient-level risk attribution.  
+  *Description:* Patient-level transparent explanation showing how clinical risk factors incrementally increase predicted risk from the base rate.
+- **Figure 8 (`Figure_8_SHAP_Dependence_Maternal_Age.png`):**  
+  *Caption:* Figure 8. Non-linear SHAP dependence plot for Maternal Age (years).  
+  *Description:* Validates the obstetric clinical boundary where risk attribution turns sharply positive at maternal age >= 35 years.
+- **Figure 9 (`Figure_9_SHAP_Dependence_Miscarriage_History.png`):**  
+  *Caption:* Figure 9. Non-linear SHAP dependence plot for Total Miscarriages.  
+  *Description:* Demonstrates that a single prior miscarriage history (>= 1) triggers an immediate surge in risk attribution (SHAP value = +1.18).
+- **Figure 10 (`Figure_10_SHAP_Dependence_Parity.png`):**  
+  *Caption:* Figure 10. Non-linear SHAP dependence plot for Parity (Prior Births).  
+  *Description:* Illustrates risk inflection in grand multiparous mothers, where parity >= 4 sharply elevates predicted maternal risk.
 """
     md_path = "EXPERIMENTAL_RESULTS_REPORT.md"
     with open(md_path, "w", encoding="utf-8") as f:
